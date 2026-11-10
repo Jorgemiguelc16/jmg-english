@@ -39,6 +39,9 @@ const Store = (() => {
       days: {},     // 'YYYY-MM-DD' -> { sec, ex, xp }
       cards: {},    // phraseId -> { iv, ef, due, reps, lapses, added, last }
       dialogs: {},  // dialogId -> { best, date }
+      custom: [],   // frases propias: { id, en, es, src, chunks }
+      memoCol: 'movies',
+      totalReps: 0,
       settings: { voice: '', rate: 0.95, autoplay: true, sounds: true },
     };
   }
@@ -51,6 +54,7 @@ const Store = (() => {
     s.days = s.days || {};
     s.cards = s.cards || {};
     s.dialogs = s.dialogs || {};
+    s.custom = Array.isArray(s.custom) ? s.custom : [];
     return s;
   }
 
@@ -120,6 +124,27 @@ const Store = (() => {
     if (d.ex >= MIN_EX_FOR_DAY) streak = markPracticed();
     save();
     return streak;
+  }
+
+  /* Repeticiones en voz alta */
+  function addReps(n = 1) {
+    const d = dayRec();
+    d.reps = (d.reps || 0) + n;
+    state.totalReps = (state.totalReps || 0) + n;
+    save();
+  }
+
+  /* Frases propias */
+  function addCustom({ en, es, src = '', chunks = [] }) {
+    const item = { id: 'c-' + Date.now().toString(36), en, es, src, chunks, added: today() };
+    state.custom.push(item);
+    save();
+    return item;
+  }
+  function removeCustom(id) {
+    state.custom = state.custom.filter((c) => c.id !== id);
+    delete state.cards[id];
+    save();
   }
 
   function finishSession() {
@@ -227,7 +252,7 @@ const Store = (() => {
 
   return {
     get state() { return state; },
-    save, today, addDays, diffDays, dateKey,
+    save, today, addDays, diffDays, dateKey, addReps, addCustom, removeCustom,
     todayRec, dayCounted, streakView, recordExercise, finishSession,
     learn, rate, practice, status, dueIds, learnedIds, weakIds, masteredCount,
     levelInfo, currentTopic, setTopic, dialogDone,

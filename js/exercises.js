@@ -19,7 +19,8 @@ function wireAudio(root, text) {
   $$('[data-say]', root).forEach((b) => { b.onclick = () => Speech.say(text, { slow: b.dataset.say === 's' }); });
 }
 function autoSay(text) { if (Store.state.settings.autoplay) setTimeout(() => Speech.say(text), 300); }
-function topicName(p) { return TOPIC_BY_ID[p.topic] ? TOPIC_BY_ID[p.topic].name : ''; }
+function topicName(p) { return TOPIC_BY_ID[p.topic] ? TOPIC_BY_ID[p.topic].name : (p.src || (COLLECTION_BY_ID[p.col] || {}).name || ''); }
+function siblings(p) { return TOPIC_BY_ID[p.topic] ? TOPIC_BY_ID[p.topic].items : ((COLLECTION_BY_ID[p.col] || {}).items || []); }
 function scoreClass(s) { return s >= 0.85 ? 'good' : s >= 0.6 ? 'mid' : 'low'; }
 function tipBox(p) { return p.tip ? `<div class="callout">${icon('bulb')}<span>${esc(p.tip)}</span></div>` : ''; }
 function optionsHtml(opts) {
@@ -29,7 +30,7 @@ const okIcon = () => icon('check');
 const badIcon = () => icon('x');
 
 function spanishDistractors(p, n) {
-  const same = shuffle(TOPIC_BY_ID[p.topic].items.filter((x) => x.id !== p.id));
+  const same = shuffle(siblings(p).filter((x) => x.id !== p.id));
   const rest = shuffle(PHRASES.filter((x) => x.topic !== p.topic));
   return uniqueBy(same.concat(rest), (x) => x.es).filter((x) => x.es !== p.es).slice(0, n).map((x) => x.es);
 }
