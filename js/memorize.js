@@ -26,7 +26,7 @@ function chunksFor(p) {
   return p.en.split(/\s+/)
     .map((w) => w.replace(/^[¿¡"(]+/, '').replace(/[.,!?…")]+$/, ''))
     .filter(Boolean)
-    .map((w) => ({ en: w, es: gloss(w) }));
+    .map((w) => ({ en: w, es: gloss(w) || (/^[A-Z]/.test(w) ? '(nombre)' : '') }));
 }
 
 function breakdownHtml(p) {
@@ -117,7 +117,10 @@ Ex.memorize = {
       wireAudio(ctx.stage, p.en);
       wireChunks(ctx.stage, p);
       autoSay(p.en);
-      ctx.foot({ msg: '<span class="muted">Cuando entiendas cada palabra, empieza a repetir.</span>', buttons: [{ label: `Empezar a repetir ${icon('arrow', 'sm')}`, onClick: nextStage }] });
+      const buttons = [];
+      if (isNew) buttons.push({ label: `${icon('check', 'sm')} Ya me la sé`, kind: 'ghost', primary: false, onClick: () => { Speech.stop(); Store.markKnown(p.id); toast('Marcada como conocida'); ctx.done({ known: true }); } });
+      buttons.push({ label: `Empezar a repetir ${icon('arrow', 'sm')}`, primary: true, onClick: nextStage });
+      ctx.foot({ msg: '<span class="muted">Cuando entiendas cada palabra, empieza a repetir.</span>', buttons });
     }
 
     /* 2-4. Repeticiones */

@@ -18,8 +18,10 @@ function nextToMemorize(colId, skip = []) {
   return (col && col.items.find((p) => !Store.state.cards[p.id] && !skip.includes(p.id))) || null;
 }
 
+function memoItem(p) { return { type: 'memorize', phrase: p, key: 'memorize:' + p.id }; }
 function startMemorize(p) {
-  Session.start([{ type: 'memorize', phrase: p, key: 'memorize:' + p.id }], 'Memorizar', {
+  Session.start([memoItem(p)], 'Memorizar', {
+    onKnown: () => { const n = nextToMemorize(p.col); return n ? memoItem(n) : null; },
     again: {
       label: 'Memorizar otra frase',
       run: () => {
@@ -30,10 +32,27 @@ function startMemorize(p) {
   });
 }
 
+/* Conversaciones */
+const nextScene = (group, skip = []) => SCENES.find((d) => (!group || d.group === group) && !Store.state.cards[d.id] && !skip.includes(d.id)) || null;
+function sceneItem(d, review = false) { return { type: 'scene', scene: d, review, key: (review ? 'scene-review:' : 'scene:') + d.id }; }
+function startScene(d) {
+  Session.start([sceneItem(d)], 'Conversación', {
+    onKnown: () => { const n = nextScene(d.group); return n ? sceneItem(n) : null; },
+    again: {
+      label: 'Otra conversación',
+      run: () => { const n = nextScene(d.group) || nextScene(); if (n) startScene(n); else toast('Ya aprendiste todas las conversaciones'); },
+    },
+  });
+}
+const totalDue = () => Store.dueIds().length + Store.dueSceneIds().length;
+
 function recallItems(ids, { free = false, mode = null } = {}) {
   return ids.map((id, i) => ({ type: 'recall', phrase: PHRASE_BY_ID[id], key: 'recall:' + id, free, mode: mode || (i % 3 === 2 ? 'write' : 'speak') }));
 }
-function startRecallDue() { Session.start(recallItems(Store.dueIds().slice(0, 20)), 'Repaso de memoria'); }
+function startRecallDue() {
+  const scenes = Store.dueSceneIds().slice(0, 3).map((id) => sceneItem(SCENE_BY_ID[id], true));
+  Session.start(scenes.concat(recallItems(Store.dueIds().slice(0, 20))), 'Repaso de memoria');
+}
 function startRecallFree(mode) {
   const ids = shuffle(Store.learnedIds()).slice(0, 10);
   Session.start(recallItems(ids, { free: true, mode }), mode === 'write' ? 'Escritura de memoria' : 'Repetir de memoria');
@@ -60,10 +79,10 @@ function todayLong() {
 function streakMessage(sv) {
   switch (sv.status) {
     case 'done': return 'Objetivo de hoy cumplido. Todo lo que hagas ahora suma extra.';
-    case 'pending': return `Memoriza o repasa una frase hoy para mantener tu racha de ${plural(sv.count, 'día', 'días')}.`;
+    case 'pending': return `Practica una conversación hoy para mantener tu racha de ${plural(sv.count, 'día', 'días')}.`;
     case 'frozen': return `No practicaste ${plural(sv.missed, 'día', 'días')}. Si practicas hoy, un protector salvará tu racha.`;
-    case 'lost': return sv.prev > 1 ? `Tu racha de ${sv.prev} días se reinició. Hoy es un buen día para empezar otra.` : 'Memoriza tu primera frase de hoy para iniciar tu racha.';
-    default: return 'Memoriza tu primera frase para iniciar tu racha.';
+    case 'lost': return sv.prev > 1 ? `Tu racha de ${sv.prev} días se reinició. Hoy es un buen día para empezar otra.` : 'Aprende una conversación hoy para iniciar tu racha.';
+    default: return 'Aprende tu primera conversación para iniciar tu racha.';
   }
 }
 function pageHead(title, sub, eyebrow = '') {
@@ -95,9 +114,9 @@ function renderWelcome() {
         <h1>Configura tu espacio</h1>
         <p class="lead">Aprende inglés como se aprende un guion: entendiendo cada palabra y repitiendo en voz alta hasta que la frase sale sola.</p>
         <div class="features">
-          <div class="feature"><div class="icon-tile">${icon('eye')}</div><div><b>1 · Entiende cada palabra</b><span>Desglose palabra por palabra y cómo suena, escrito para hispanohablantes.</span></div></div>
-          <div class="feature"><div class="icon-tile">${icon('mic')}</div><div><b>2 · Repite 10 veces en voz alta</b><span>Con texto, con pistas y de memoria. El micrófono cuenta tus repeticiones.</span></div></div>
-          <div class="feature"><div class="icon-tile">${icon('pen')}</div><div><b>3 · Escríbela</b><span>Termina escribiéndola de memoria para fijarla.</span></div></div>
+          <div class="feature"><div class="icon-tile">${icon('messages')}</div><div><b>1 · Conversaciones completas</b><span>${SCENES.length} escenas reales de vida diaria, amigos, trabajo y universidad.</span></div></div>
+          <div class="feature"><div class="icon-tile">${icon('mic')}</div><div><b>2 · Repite y actúa tu parte</b><span>Escuchas, repites línea por línea y luego dices tu parte de memoria. El micrófono te escucha.</span></div></div>
+          <div class="feature"><div class="icon-tile">${icon('check')}</div><div><b>3 · Salta lo que ya sabes</b><span>Marca “Ya me la sé” y la app no te la vuelve a enseñar.</span></div></div>
           <div class="feature"><div class="icon-tile">${icon('brain')}</div><div><b>4 · Repasa justo antes de olvidarla</b><span>${total} frases: películas, series, palabras cotidianas y conversación. Y puedes agregar las tuyas.</span></div></div>
         </div>
         <label class="field-label" for="w-name">Tu nombre</label>
@@ -121,30 +140,42 @@ function renderWelcome() {
 
 /* ---------- Inicio ---------- */
 let homeSkip = [];
+let sceneSkip = [];
 function renderHome() {
   const st = Store.state;
   const sv = Store.streakView();
   const td = Store.todayRec();
-  const due = Store.dueIds().length;
+  const due = totalDue();
+  const scenesLearned = Store.learnedSceneIds().length;
   const memorized = Store.learnedIds().length;
-  const total = COLLECTIONS.reduce((n, c) => n + c.items.length, 0);
-  const colId = COLLECTION_BY_ID[st.memoCol] ? st.memoCol : 'movies';
-  let next = nextToMemorize(colId, homeSkip);
-  if (!next && homeSkip.length) { homeSkip = []; next = nextToMemorize(colId); }
   const hour = new Date().getHours();
   const hello = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
   const tip = TIPS[Math.floor(Date.now() / 86400000) % TIPS.length];
 
-  const t = Store.today();
-  const days = [];
-  for (let i = 13; i >= 0; i--) {
-    const key = Store.addDays(t, -i);
-    const [y, m, d] = key.split('-').map(Number);
-    const rec = st.days[key];
-    const lvl = !Store.dayCounted(key) ? (rec && rec.ex ? 1 : 0) : (rec.reps || 0) >= 25 || rec.sec >= 1500 ? 3 : 2;
-    days.push({ letter: DAY_LETTERS[new Date(y, m - 1, d).getDay()], lvl, isToday: i === 0, title: `${d}/${m} · ${rec ? `${rec.reps || 0} repeticiones · ${fmtMinutes(rec.sec)} min` : 'sin práctica'}` });
-  }
+  // Conversación siguiente
+  const grp = SCENE_GROUP_BY_ID[st.sceneGroup] ? st.sceneGroup : '';
+  let scene = nextScene(grp, sceneSkip);
+  if (!scene && sceneSkip.length) { sceneSkip = []; scene = nextScene(grp); }
+  const sceneBody = scene ? (() => {
+    const ls = sceneLines(scene).slice(0, 3);
+    return `
+      <div class="next-phrase">
+        <div class="memo-source">${sceneGroupBadge(scene)}</div>
+        <div class="np-title">${esc(scene.title)}</div>
+        <p class="muted small" style="margin-bottom:12px">${esc(scene.context)} · ${scene.lines.length} líneas</p>
+        <div class="scene-chat preview show-es">${ls.map((l, i) => bubbleHtml(scene, l, i)).join('')}<div class="preview-more">…</div></div>
+        <div class="row-btns" style="margin-top:16px">
+          <button class="btn primary lg" id="go-scene" type="button">${icon('play')} Aprender esta conversación</button>
+          <button class="btn secondary lg" id="sc-known" type="button">${icon('check')} Ya me la sé</button>
+          <button class="btn ghost lg" id="sc-skip" type="button">${icon('shuffle')} Otra</button>
+        </div>
+      </div>`;
+  })() : `<div class="empty">${icon('award', 'xl')}<b>¡Aprendiste todas las conversaciones${grp ? ' de este tema' : ''}!</b><span>Sigue repasándolas de memoria para que no se te olviden.</span></div>`;
 
+  // Frase suelta siguiente
+  const colId = COLLECTION_BY_ID[st.memoCol] ? st.memoCol : 'movies';
+  let next = nextToMemorize(colId, homeSkip);
+  if (!next && homeSkip.length) { homeSkip = []; next = nextToMemorize(colId); }
   const col = COLLECTION_BY_ID[colId];
   let memoBody;
   if (next) {
@@ -155,15 +186,26 @@ function renderHome() {
         <div class="np-en">${esc(next.en)}</div>
         <div class="np-es">${esc(next.es)}</div>
         <div class="row-btns">
-          <button class="btn primary lg" id="go-memo" type="button">${icon('mic')} Memorizar esta frase</button>
-          <button class="btn secondary lg" id="np-play" type="button">${icon('volume')} Escuchar</button>
-          <button class="btn ghost lg" id="np-skip" type="button">${icon('shuffle')} Otra</button>
+          <button class="btn primary" id="go-memo" type="button">${icon('mic', 'sm')} Memorizar</button>
+          <button class="btn secondary" id="np-play" type="button">${icon('volume', 'sm')} Escuchar</button>
+          <button class="btn secondary" id="np-known" type="button">${icon('check', 'sm')} Ya me la sé</button>
+          <button class="btn ghost" id="np-skip" type="button">${icon('shuffle', 'sm')} Otra</button>
         </div>
       </div>`;
   } else if (colId === 'mine') {
     memoBody = `<div class="empty">${icon('bookmark', 'xl')}<b>Aún no tienes frases propias</b><span>Cuando escuches una frase que te guste en una película o serie, guárdala aquí.</span><a class="btn primary" href="#add">${icon('plus', 'sm')} Agregar mi primera frase</a></div>`;
   } else {
-    memoBody = `<div class="empty">${icon('award', 'xl')}<b>¡Memorizaste toda la colección “${esc(col.name)}”!</b><span>Elige otra colección o sigue repasando de memoria.</span></div>`;
+    memoBody = `<div class="empty">${icon('award', 'xl')}<b>¡Terminaste la colección “${esc(col.name)}”!</b><span>Elige otra colección.</span></div>`;
+  }
+
+  const t = Store.today();
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const key = Store.addDays(t, -i);
+    const [y, m, d] = key.split('-').map(Number);
+    const rec = st.days[key];
+    const lvl = !Store.dayCounted(key) ? (rec && rec.ex ? 1 : 0) : (rec.reps || 0) >= 25 || rec.sec >= 1500 ? 3 : 2;
+    days.push({ letter: DAY_LETTERS[new Date(y, m - 1, d).getDay()], lvl, isToday: i === 0, title: `${d}/${m} · ${rec ? `${rec.reps || 0} repeticiones · ${fmtMinutes(rec.sec)} min` : 'sin práctica'}` });
   }
 
   $('#app').innerHTML = `
@@ -176,9 +218,9 @@ function renderHome() {
         <div class="kpi-sub">Récord ${st.streak.best} · ${plural(sv.freezes, 'protector', 'protectores')}</div>
       </div>
       <div class="card kpi">
-        <div class="kpi-top"><span>Frases memorizadas</span>${icon('brain')}</div>
-        <div class="kpi-value">${memorized}<small>de ${total}</small></div>
-        <div class="bar"><div style="width:${(memorized / total) * 100}%"></div></div>
+        <div class="kpi-top"><span>Conversaciones</span>${icon('messages')}</div>
+        <div class="kpi-value">${scenesLearned}<small>de ${SCENES.length}</small></div>
+        <div class="kpi-sub">${plural(memorized, 'frase suelta', 'frases sueltas')}</div>
       </div>
       <div class="card kpi">
         <div class="kpi-top"><span>Repeticiones hoy</span>${icon('mic')}</div>
@@ -187,21 +229,33 @@ function renderHome() {
       </div>
       <div class="card kpi">
         <div class="kpi-top"><span>Por repasar</span>${icon('repeat')}</div>
-        <div class="kpi-value">${due}<small>${due === 1 ? 'frase' : 'frases'}</small></div>
-        <div class="kpi-sub">${due ? 'Te están esperando' : 'Estás al día'}</div>
+        <div class="kpi-value">${due}</div>
+        <div class="kpi-sub">${due ? 'Conversaciones y frases' : 'Estás al día'}</div>
       </div>
     </section>
 
     <section class="card step-card">
       <span class="step-num">1</span>
-      <div class="grow"><h2>Repaso de memoria</h2><p class="muted">Ves el español y dices la frase en inglés sin ayuda. Así no se te olvidan las que ya aprendiste.</p></div>
+      <div class="grow"><h2>Repaso de memoria</h2><p class="muted">Actúa de memoria las conversaciones y frases que ya aprendiste, justo antes de que se te olviden.</p></div>
       <button class="btn ${due ? 'primary' : 'secondary'} lg" id="go-recall" type="button" ${due ? '' : 'disabled'}>${due ? `Repasar ${due}` : 'Al día'} ${due ? icon('arrow', 'sm') : icon('check', 'sm')}</button>
     </section>
 
     <section class="card memo-card">
       <div class="memo-head">
         <span class="step-num">2</span>
-        <div class="grow"><h2>Memoriza una frase nueva</h2><p class="muted">Entiéndela palabra por palabra, repítela 10 veces en voz alta y escríbela de memoria.</p></div>
+        <div class="grow"><h2>Aprende una conversación</h2><p class="muted">Escúchala, repítela línea por línea y luego actúa tu parte de memoria, como un actor.</p></div>
+      </div>
+      <div class="col-chips">
+        <button class="chip-btn${!grp ? ' on' : ''}" data-grp="" type="button">${icon('messages', 'sm')}<span>Todas</span><span class="count">${scenesLearned}/${SCENES.length}</span></button>
+        ${SCENE_GROUPS.map((g) => { const n = SCENES.filter((d) => d.group === g.id); return `<button class="chip-btn${g.id === grp ? ' on' : ''}" data-grp="${g.id}" type="button">${icon(g.icon, 'sm')}<span>${g.short}</span><span class="count">${n.filter((d) => st.cards[d.id]).length}/${n.length}</span></button>`; }).join('')}
+      </div>
+      ${sceneBody}
+    </section>
+
+    <section class="card memo-card secondary">
+      <div class="memo-head">
+        <span class="step-num">3</span>
+        <div class="grow"><h2>Frases sueltas <span class="opt">Opcional</span></h2><p class="muted">Películas, palabras cotidianas y tus propias frases.</p></div>
       </div>
       <div class="col-chips">${COLLECTIONS.map((c) => `<button class="chip-btn${c.id === colId ? ' on' : ''}" data-col="${c.id}" type="button">${icon(c.icon, 'sm')}<span>${c.short}</span><span class="count">${learnedIn(c)}/${c.items.length}</span></button>`).join('')}</div>
       ${memoBody}
@@ -209,7 +263,7 @@ function renderHome() {
 
     <section class="card add-cta">
       <span class="icon-tile">${icon('film')}</span>
-      <div class="grow"><b>¿Escuchaste una frase que te gustó?</b><p class="muted small">Guárdala en “Mis frases” y memorízala con el mismo método.</p></div>
+      <div class="grow"><b>¿Escuchaste una frase que te gustó?</b><p class="muted small">Guárdala en “Mis frases” y memorízala.</p></div>
       <a class="btn secondary" href="#add">${icon('plus', 'sm')} Agregar frase</a>
     </section>
 
@@ -222,9 +276,10 @@ function renderHome() {
         </div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h2>Colecciones</h2><p>Frases memorizadas por colección</p></div></div>
+        <div class="card-head"><div><h2>Progreso</h2><p>Lo que ya tienes en la memoria</p></div></div>
         <div class="card-body stat-list">
-          ${COLLECTIONS.map((c) => { const n = learnedIn(c); const pct = c.items.length ? (n / c.items.length) * 100 : 0; return `<a class="col-progress" href="#library/${c.id}"><div class="stat-row"><span>${icon(c.icon, 'sm')} ${c.name}</span><b>${n} / ${c.items.length}</b></div><div class="bar"><div style="width:${pct}%"></div></div></a>`; }).join('')}
+          ${SCENE_GROUPS.map((g) => { const all = SCENES.filter((d) => d.group === g.id); const n = all.filter((d) => st.cards[d.id]).length; return `<a class="col-progress" href="#library/scenes"><div class="stat-row"><span>${icon(g.icon, 'sm')} ${g.name}</span><b>${n} / ${all.length}</b></div><div class="bar"><div style="width:${(n / all.length) * 100}%"></div></div></a>`; }).join('')}
+          ${COLLECTIONS.filter((c) => c.items.length).map((c) => { const n = learnedIn(c); return `<a class="col-progress" href="#library/${c.id}"><div class="stat-row"><span>${icon(c.icon, 'sm')} ${c.name}</span><b>${n} / ${c.items.length}</b></div><div class="bar"><div style="width:${(n / c.items.length) * 100}%"></div></div></a>`; }).join('')}
         </div>
       </div>
     </section>
@@ -232,18 +287,70 @@ function renderHome() {
     <section class="card note">${icon('bulb')}<div><b>Consejo del día</b><p>${esc(tip)}</p></div></section>`;
 
   $('#go-recall').onclick = startRecallDue;
+  $$('[data-grp]').forEach((b) => { b.onclick = () => { st.sceneGroup = b.dataset.grp; Store.save(); sceneSkip = []; renderHome(); }; });
   $$('[data-col]').forEach((b) => { b.onclick = () => { st.memoCol = b.dataset.col; Store.save(); homeSkip = []; renderHome(); }; });
+  if (scene) {
+    wirePlay_home(scene);
+    $('#go-scene').onclick = () => startScene(scene);
+    $('#sc-known').onclick = () => { Store.markKnown(scene.id); toast('Conversación marcada como conocida'); renderHome(); };
+    $('#sc-skip').onclick = () => { sceneSkip.push(scene.id); renderHome(); };
+  }
   if (next) {
     $('#go-memo').onclick = () => startMemorize(next);
     $('#np-play').onclick = () => Speech.say(next.en);
+    $('#np-known').onclick = () => { Store.markKnown(next.id); toast('Marcada como conocida'); renderHome(); };
     $('#np-skip').onclick = () => { homeSkip.push(next.id); renderHome(); };
   }
 }
+function wirePlay_home(scene) {
+  const ls = sceneLines(scene);
+  const V = sceneVoices();
+  $$('.preview [data-play]').forEach((b) => { b.onclick = () => { const l = ls[Number(b.dataset.play)]; Speech.say(l.en, V[l.sp]); }; });
+}
 
 /* ---------- Biblioteca ---------- */
-const libState = { tab: 'movies', q: '', filter: '' };
+const libState = { tab: 'scenes', q: '', filter: '' };
+function libTabs(current) {
+  const tabs = [{ id: 'scenes', icon: 'messages', short: 'Conversaciones', n: SCENES.length }].concat(COLLECTIONS.map((c) => ({ id: c.id, icon: c.icon, short: c.short, n: c.items.length })));
+  return `<div class="tabs" role="tablist">${tabs.map((c) => `<a class="tab${c.id === current ? ' on' : ''}" href="#library/${c.id}" role="tab">${icon(c.icon, 'sm')}<span>${c.short}</span><span class="count">${c.n}</span></a>`).join('')}</div>`;
+}
+function renderScenesLibrary() {
+  $('#app').innerHTML = `
+    ${pageHead('Biblioteca', 'Elige una conversación y apréndela como un actor: escuchar, repetir y actuar tu parte de memoria.')}
+    ${libTabs('scenes')}
+    <div class="card rows">
+      <div class="toolbar lib">
+        <div class="input-icon">${icon('search', 'sm')}<input class="input" id="lib-q" type="search" placeholder="Buscar conversación" value="${esc(libState.q)}"></div>
+        <select class="select" id="lib-filter"><option value="">Todos los temas</option>${SCENE_GROUPS.map((g) => `<option value="${g.id}"${libState.filter === g.id ? ' selected' : ''}>${esc(g.name)}</option>`).join('')}</select>
+      </div>
+      <div class="list-count" id="lib-count"></div>
+      <div id="lib-list"></div>
+    </div>`;
+  const draw = () => {
+    const q = libState.q.trim().toLowerCase();
+    const rows = SCENES.filter((d) => (!libState.filter || d.group === libState.filter) && (!q || [d.title, d.context, ...d.lines.map((l) => l[1] + ' ' + l[2])].some((x) => x.toLowerCase().includes(q))));
+    $('#lib-count').textContent = `${rows.length} de ${SCENES.length} · ${Store.learnedSceneIds().length} aprendidas`;
+    $('#lib-list').innerHTML = rows.map((d) => {
+      const [lbl, cls] = statusInfo(d);
+      const g = SCENE_GROUP_BY_ID[d.group];
+      return `<div class="row-item">
+        <span class="icon-tile neutral">${icon(g.icon)}</span>
+        <div class="grow"><div class="p-en">${esc(d.title)}</div><div class="p-es">${esc(d.context)} · ${d.lines.length} líneas</div></div>
+        <span class="badge ${cls}">${lbl}</span>
+        ${Store.state.cards[d.id] ? '' : `<button class="btn ghost sm" data-known="${d.id}" type="button">Ya me la sé</button>`}
+        <button class="btn secondary sm" data-scene="${d.id}" type="button">${Store.state.cards[d.id] ? 'Practicar' : 'Aprender'}</button>
+      </div>`;
+    }).join('') || `<div class="empty">${icon('messages', 'xl')}<b>No hay conversaciones que coincidan</b></div>`;
+    $$('#lib-list [data-scene]').forEach((b) => { b.onclick = () => startScene(SCENE_BY_ID[b.dataset.scene]); });
+    $$('#lib-list [data-known]').forEach((b) => { b.onclick = () => { Store.markKnown(b.dataset.known); toast('Marcada como conocida'); draw(); }; });
+  };
+  $('#lib-q').addEventListener('input', (e) => { libState.q = e.target.value; draw(); });
+  $('#lib-filter').addEventListener('input', (e) => { libState.filter = e.target.value; draw(); });
+  draw();
+}
 function renderLibrary(sub) {
-  if (sub && COLLECTION_BY_ID[sub]) { if (libState.tab !== sub) libState.filter = ''; libState.tab = sub; }
+  if (sub && (COLLECTION_BY_ID[sub] || sub === 'scenes')) { if (libState.tab !== sub) { libState.filter = ''; libState.q = ''; } libState.tab = sub; }
+  if (libState.tab === 'scenes') return renderScenesLibrary();
   const col = COLLECTION_BY_ID[libState.tab];
   let filterHtml = '';
   if (col.id === 'conv') filterHtml = `<select class="select" id="lib-filter"><option value="">Todos los temas</option>${TOPICS.map((t) => `<option value="${t.id}"${libState.filter === t.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select>`;
@@ -253,7 +360,7 @@ function renderLibrary(sub) {
 
   $('#app').innerHTML = `
     ${pageHead('Biblioteca', 'Elige cualquier frase y memorízala con el método de repetición.')}
-    <div class="tabs" role="tablist">${COLLECTIONS.map((c) => `<a class="tab${c.id === col.id ? ' on' : ''}" href="#library/${c.id}" role="tab">${icon(c.icon, 'sm')}<span>${c.short}</span><span class="count">${c.items.length}</span></a>`).join('')}</div>
+    ${libTabs(col.id)}
     <div class="card rows">
       <div class="toolbar lib">
         <div class="input-icon">${icon('search', 'sm')}<input class="input" id="lib-q" type="search" placeholder="Buscar en inglés o español" value="${esc(libState.q)}"></div>
@@ -280,12 +387,14 @@ function renderLibrary(sub) {
         <button class="play-btn" data-say="${esc(p.word || p.en)}" type="button" title="Escuchar">${icon('volume')}</button>
         <div class="grow">${main}</div>
         <span class="badge ${cls}">${lbl}</span>
+        ${Store.state.cards[p.id] ? '' : `<button class="btn ghost sm" data-known="${p.id}" type="button">Ya me la sé</button>`}
         <button class="btn secondary sm" data-memo="${p.id}" type="button">${Store.state.cards[p.id] ? 'Repetir' : 'Memorizar'}</button>
         ${col.id === 'mine' ? `<button class="icon-btn" data-del="${p.id}" type="button" title="Eliminar">${icon('trash', 'sm')}</button>` : ''}
       </div>`;
     }).join('') : `<div class="empty">${icon(col.icon, 'xl')}<b>${col.id === 'mine' && !col.items.length ? 'Todavía no agregaste frases' : 'No hay frases que coincidan'}</b>${col.id === 'mine' && !col.items.length ? `<span>Agrega frases de tus películas, series o canciones favoritas.</span><a class="btn primary" href="#add">${icon('plus', 'sm')} Agregar frase</a>` : ''}</div>`;
     $$('#lib-list [data-say]').forEach((b) => { b.onclick = () => Speech.say(b.dataset.say); });
     $$('#lib-list [data-memo]').forEach((b) => { b.onclick = () => startMemorize(PHRASE_BY_ID[b.dataset.memo]); });
+    $$('#lib-list [data-known]').forEach((b) => { b.onclick = () => { Store.markKnown(b.dataset.known); toast('Marcada como conocida'); draw(); }; });
     $$('#lib-list [data-del]').forEach((b) => {
       b.onclick = () => {
         const p = PHRASE_BY_ID[b.dataset.del];
@@ -351,7 +460,7 @@ function renderAdd() {
 
 /* ---------- Práctica ---------- */
 function renderPractice() {
-  const due = Store.dueIds().length;
+  const due = totalDue();
   const learned = Store.learnedIds().length;
   const memory = [
     { id: 'due', icon: 'brain', title: 'Repaso de memoria', desc: due ? plural(due, 'frase pendiente', 'frases pendientes') : 'No hay repasos pendientes', disabled: !due, run: startRecallDue },

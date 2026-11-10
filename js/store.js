@@ -177,6 +177,12 @@ const Store = (() => {
     save();
   }
 
+  // "Ya me la sé": entra a la memoria con un intervalo largo (solo aparece de vez en cuando)
+  function markKnown(id) {
+    state.cards[id] = { iv: 30, ef: 2.7, due: addDays(today(), 30), reps: 1, lapses: 0, added: today(), last: today(), known: true };
+    save();
+  }
+
   // Resultado de práctica (dictado, pronunciación...). Si te fue mal, la frase vuelve pronto.
   function practice(id, score) {
     const c = state.cards[id];
@@ -202,6 +208,11 @@ const Store = (() => {
       .sort((a, b) => (a[1].due < b[1].due ? -1 : a[1].due > b[1].due ? 1 : b[1].lapses - a[1].lapses))
       .map(([id]) => id);
   }
+  function dueSceneIds() {
+    const t = today();
+    return Object.keys(state.cards).filter((id) => SCENE_BY_ID[id] && state.cards[id].due <= t).sort((a, b) => (state.cards[a].due < state.cards[b].due ? -1 : 1));
+  }
+  function learnedSceneIds() { return Object.keys(state.cards).filter((id) => SCENE_BY_ID[id]); }
   function learnedIds() { return Object.keys(state.cards).filter((id) => PHRASE_BY_ID[id]); }
   function weakIds() {
     return learnedIds()
@@ -254,7 +265,7 @@ const Store = (() => {
     get state() { return state; },
     save, today, addDays, diffDays, dateKey, addReps, addCustom, removeCustom,
     todayRec, dayCounted, streakView, recordExercise, finishSession,
-    learn, rate, practice, status, dueIds, learnedIds, weakIds, masteredCount,
+    learn, rate, practice, status, dueIds, learnedIds, markKnown, dueSceneIds, learnedSceneIds, weakIds, masteredCount,
     levelInfo, currentTopic, setTopic, dialogDone,
     exportData, importData, reset,
     MIN_EX_FOR_DAY,

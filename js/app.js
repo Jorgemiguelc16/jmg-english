@@ -207,7 +207,9 @@ const Session = (() => {
       s.requeued.add(item.key);
       s.queue.push({ ...item, requeued: true });
     }
-    const streak = Store.recordExercise({ xp, sec });
+    if (r.known && s.opts.onKnown) { const nx = s.opts.onKnown(); if (nx) s.queue.push(nx); }
+    if (!r.known) s.realDone = (s.realDone || 0) + 1;
+    const streak = r.known ? null : Store.recordExercise({ xp, sec });
     if (streak) streakToast(streak);
     const lv = Store.levelInfo().level;
     if (lv > s.levelBefore) { s.levelBefore = lv; setTimeout(() => toast(`Subiste al <b>nivel ${lv}</b> · ${Store.levelInfo().title}`), streak ? 3300 : 0); }
@@ -216,6 +218,7 @@ const Session = (() => {
   }
 
   function finish() {
+    if (!s.realDone) { close(); return; }   // solo se marcaron cosas como conocidas
     const streak = Store.finishSession();
     if (streak) streakToast(streak);
     Sfx.done();
@@ -259,7 +262,7 @@ const Session = (() => {
   }
 
   function exit() {
-    if (s && !s.finished && s.i > 0 && !confirm('¿Salir de la sesión? Lo que ya completaste queda guardado.')) return;
+    if (s && !s.finished && s.realDone && !confirm('¿Salir de la sesión? Lo que ya completaste queda guardado.')) return;
     close();
   }
 

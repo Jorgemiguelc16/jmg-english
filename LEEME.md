@@ -21,17 +21,15 @@ Para pasar tu progreso de uno a otro (o a tu celular): **Ajustes → Datos → D
 
 Cada día, en **Inicio**:
 
-1. **Repaso de memoria**: ves el español y dices la frase en inglés sin ayuda.
-2. **Memoriza una frase nueva** (de Películas, Palabras, Conversación o Mis frases):
-   1. **Entender**: desglose palabra por palabra y cómo suena.
-   2. **Repetir** 4 veces en voz alta viendo el texto (el micrófono cuenta cada repetición).
-   3. **Con pistas** 3 veces: solo ves la primera letra de cada palabra.
-   4. **De memoria** 3 veces: solo ves el español.
-   5. **Escribir** la frase de memoria.
+1. **Repaso de memoria**: actúas de memoria las conversaciones y frases que ya aprendiste.
+2. **Aprende una conversación** (Vida diaria · Amigos · Trabajo y uni), como un actor:
+   1. **Escuchar**: la escena con dos voces, traducción y palabra por palabra (toca una línea).
+   2. **Repetir** línea por línea, las veces que quieras (tus líneas 3 veces).
+   3. **Tu parte**: la otra persona habla y tú dices tus líneas **de memoria**.
+   4. **Cambia de papel**: ahora haces el otro personaje.
+3. **Frases sueltas** (opcional): películas, palabras cotidianas y tus propias frases.
 
-¿Escuchaste una frase que te gustó en una película o serie? **Agregar** → guárdala y memorízala.
-
-En **Práctica** hay escritura de memoria, sesiones mixtas, dictados y diálogos.
+¿Ya te sabes algo? Usa **Ya me la sé** y no te lo vuelve a enseñar (solo aparece de vez en cuando en repasos).
 
 Atajos: **Barra espaciadora** = repetir / hablar · **Enter** = botón principal · **1–4** = opciones.
 
@@ -61,6 +59,8 @@ Abre `js/data.js` y agrega frases **al final** de cualquier tema (nunca en medio
 | `css/styles.css` | Diseño (modo claro y oscuro automático) |
 | `js/data.js` | **Contenido**: frases de conversación, diálogos y consejos |
 | `js/memo-data.js` | **Contenido**: películas, palabras cotidianas y glosario |
+| `js/scenes-data.js` | **Contenido**: las 30 conversaciones |
+| `js/scenes.js` | Método de conversaciones (escuchar, repetir, actuar) |
 | `js/memorize.js` | Método de memorización y repaso de memoria |
 | `js/screens.js` | Pantallas (inicio, biblioteca, agregar, práctica, ajustes) |
 | `js/app.js` | Armado de sesiones mixtas |
