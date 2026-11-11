@@ -13,7 +13,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- El orden importa: responsive.css debe ir al final -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/session.css">
+  <link rel="stylesheet" href="css/memorize.css">
+  <link rel="stylesheet" href="css/scenes.css">
+  <link rel="stylesheet" href="css/translate.css">
+  <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
   <div class="layout">
@@ -31,17 +41,41 @@
   <div id="session" class="session hidden"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/data.js"></script>
-  <script src="js/memo-data.js"></script>
-  <script src="js/scenes-data.js"></script>
-  <script src="js/util.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/text.js"></script>
-  <script src="js/speech.js"></script>
-  <script src="js/exercises.js"></script>
-  <script src="js/memorize.js"></script>
-  <script src="js/scenes.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/screens.js"></script>
+  <!-- Contenido: frases, conversaciones y glosario -->
+  <script src="js/data/topics.js"></script>
+  <script src="js/data/dialogues.js"></script>
+  <script src="js/data/tips.js"></script>
+  <script src="js/data/movies.js"></script>
+  <script src="js/data/words.js"></script>
+  <script src="js/data/british.js"></script>
+  <script src="js/data/glossary.js"></script>
+  <script src="js/data/collections.js"></script>
+  <script src="js/data/scenes.js"></script>
+  <!-- Núcleo: utilidades, progreso, texto y voz -->
+  <script src="js/core/util.js"></script>
+  <script src="js/core/icons.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/text.js"></script>
+  <script src="js/core/speech.js"></script>
+  <script src="js/core/translator.js"></script>
+  <!-- Ejercicios -->
+  <script src="js/exercises/practice.js"></script>
+  <script src="js/exercises/memorize.js"></script>
+  <script src="js/exercises/scene.js"></script>
+  <!-- Sesiones -->
+  <script src="js/session/plans.js"></script>
+  <script src="js/session/session.js"></script>
+  <script src="js/session/starters.js"></script>
+  <!-- Pantallas -->
+  <script src="js/screens/shared.js"></script>
+  <script src="js/screens/welcome.js"></script>
+  <script src="js/screens/home.js"></script>
+  <script src="js/screens/library.js"></script>
+  <script src="js/screens/translate.js"></script>
+  <script src="js/screens/add.js"></script>
+  <script src="js/screens/practice.js"></script>
+  <script src="js/screens/settings.js"></script>
+  <!-- Arranque -->
+  <script src="js/main.js"></script>
 </body>
 </html>

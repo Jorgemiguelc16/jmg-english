@@ -9,7 +9,11 @@
   Después entra al "Repaso de memoria" (repaso espaciado): ves el español y la dices sin ayuda.
 */
 
+// Las pistas "así suena" de las frases normales son de acento americano
+function soundFor(p) { return p.col === 'british' || Speech.accent() !== 'uk' ? (p.sound || '') : ''; }
+
 function sourceBadge(p) {
+  if (p.col === 'british') return `<span class="badge accent">${icon('globe', 'sm')} Inglés británico</span>`;
   if (p.col === 'movies') return `<span class="badge accent">${icon('film', 'sm')} ${esc(p.kind || 'Película')} · ${esc(p.src)}</span>`;
   if (p.col === 'words') return `<span class="badge accent">${icon('type', 'sm')} Palabra · ${esc(p.word)}</span>`;
   if (p.col === 'mine') return `<span class="badge accent">${icon('bookmark', 'sm')} Mis frases${p.src ? ' · ' + esc(p.src) : ''}</span>`;
@@ -71,10 +75,11 @@ async function listenScore(target, onInterim) {
 const MIC_ERRORS = {
   'not-allowed': 'El micrófono está bloqueado. Habilítalo desde el ícono de candado en la barra de direcciones.',
   'service-not-allowed': 'El micrófono está bloqueado. Habilítalo desde el ícono de candado en la barra de direcciones.',
-  network: 'El reconocimiento de voz necesita conexión a internet.',
+  network: 'El micrófono necesita internet.',
   'audio-capture': 'No se encontró un micrófono conectado.',
 };
-const isBlocked = (err) => err === 'not-allowed' || err === 'service-not-allowed' || err === 'audio-capture' || err === 'unsupported';
+// Errores que obligan a seguir en modo manual (sin micrófono)
+const isBlocked = (err) => ['not-allowed', 'service-not-allowed', 'audio-capture', 'unsupported', 'network'].includes(err);
 
 /* ===================== Memorizar (método completo) ===================== */
 Ex.memorize = {
@@ -106,13 +111,13 @@ Ex.memorize = {
       ctx.stage.innerHTML = `
         ${stepper()}
         <div class="memo-source">${sourceBadge(p)}</div>
-        ${p.word ? `<div class="word-head"><span class="wh-word">${esc(p.word)}</span><span class="wh-es">${esc(p.wordEs)}</span>${p.sound ? `<span class="wh-sound">suena “${esc(p.sound)}”</span>` : ''}</div>` : ''}
+        ${p.word ? `<div class="word-head"><span class="wh-word">${esc(p.word)}</span><span class="wh-es">${esc(p.wordEs)}</span>${soundFor(p) ? `<span class="wh-sound">suena “${esc(soundFor(p))}”</span>` : ''}</div>` : ''}
         <div class="phrase-en">${esc(p.en)}</div>
         <div class="phrase-es">${esc(p.es)}</div>
         ${audioRow(true)}
         <div class="section-label">Palabra por palabra · toca cada bloque para escucharlo</div>
         ${breakdownHtml(p)}
-        ${p.sound && !p.word ? `<div class="sound-line">${icon('volume', 'sm')}<span>Así suena (aprox.): <b>${esc(p.sound)}</b></span></div>` : ''}
+        ${soundFor(p) && !p.word ? `<div class="sound-line">${icon('volume', 'sm')}<span>Así suena (aprox.): <b>${esc(soundFor(p))}</b></span></div>` : ''}
         ${tipBox(p)}`;
       wireAudio(ctx.stage, p.en);
       wireChunks(ctx.stage, p);
@@ -330,7 +335,7 @@ Ex.recall = {
           ${c ? `<div class="aligned big">${spokenHtml || c.html}</div><div class="you-wrote">${write ? 'Escribiste' : 'Se escuchó'}: “${esc(attempt)}”</div>` : `<div class="phrase-en sm">${esc(p.en)}</div>`}
           ${audioRow()}
         </div>
-        ${p.sound && !p.word ? `<div class="sound-line">${icon('volume', 'sm')}<span>Así suena: <b>${esc(p.sound)}</b></span></div>` : ''}`;
+        ${soundFor(p) && !p.word ? `<div class="sound-line">${icon('volume', 'sm')}<span>Así suena: <b>${esc(soundFor(p))}</b></span></div>` : ''}`;
       wireAudio($('.result', ctx.stage), p.en);
       Speech.say(p.en);
       const pass = passMark(p.en);

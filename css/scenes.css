@@ -1,0 +1,44 @@
+/* ============ Conversaciones ============ */
+.memo-card.secondary { background: var(--surface); }
+.memo-card.secondary .next-phrase { padding: 16px 18px; }
+.memo-card.secondary .np-en { font-size: 1.25rem; }
+.np-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; margin-top: 12px; }
+.scene-head { text-align: center; margin-bottom: 6px; }
+.scene-head h2 { font-size: 1.5rem; margin: 10px 0 4px; }
+.scene-chat { display: flex; flex-direction: column; gap: 10px; margin: 18px 0; }
+.scene-chat .t-es { display: none; }
+.scene-chat.show-es .t-es { display: block; }
+.scene-chat .t-bubble { max-width: 78%; }
+.scene-chat .t-line.b .t-bubble { background: var(--accent-soft); border-color: transparent; }
+.scene-chat .t-line.playing .t-bubble { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.scene-chat.preview { margin: 4px 0 0; pointer-events: auto; }
+.scene-chat.preview .t-bubble { cursor: default; }
+.preview-more { text-align: center; color: var(--faint); font-weight: 700; letter-spacing: .2em; }
+.scene-chat.compact { margin: 6px 0 10px; }
+.t-line.faded { opacity: .55; }
+.t-note { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); font-size: .8rem; color: var(--warn); }
+.t-note .i { width: 14px; height: 14px; margin-top: 2px; }
+.t-words:empty { display: none; }
+.t-words { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.t-words .breakdown { justify-content: flex-start; gap: 6px; }
+.t-words .chunk { min-width: 0; padding: 6px 9px; }
+.t-words .c-en { font-size: .88rem; }
+.t-words .c-es { font-size: .72rem; }
+.line-card { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-lg); padding: 18px 20px; text-align: center; }
+.line-card.mine { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.line-card .t-who { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.line-card .callout { margin-top: 12px; }
+.t-line.my-turn .t-bubble { border: 1px dashed var(--accent); background: var(--surface); }
+.t-line.my-turn .t-es { display: block; font-weight: 600; color: var(--text); font-size: .95rem; margin: 0; padding: 0; border: 0; }
+.t-line.said-ok .t-bubble { border-color: var(--ok); }
+.t-line.said-ok .t-en { color: var(--ok); }
+.t-line.said-miss .t-bubble { border-color: var(--warn); }
+.t-line.said-miss .t-en { color: var(--warn); }
+.scene-chat.act .t-line.said-ok .t-es, .scene-chat.act .t-line.said-miss .t-es { display: block; }
+.turn-zone:empty { display: none; }
+.turn-card { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; border: 1px solid var(--accent); background: var(--surface); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: 0 0 0 4px var(--accent-soft); }
+.turn-card .label { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.turn-card .phrase-en { margin: 0; }
+.turn-card .answer-card { width: 100%; }
+.hint-line { font-size: 1.1rem; color: var(--text-2); }
+.act-summary { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 16px; margin-top: 8px; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; }

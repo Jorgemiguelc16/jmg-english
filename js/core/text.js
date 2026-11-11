@@ -15,6 +15,14 @@ const Text = (() => {
     "i'll": 'i will', "you'll": 'you will', "we'll": 'we will', "they'll": 'they will', "it'll": 'it will',
     "he'll": 'he will', "she'll": 'she will', "i'd": 'i would', "you'd": 'you would', "we'd": 'we would',
     "they'd": 'they would', "i've": 'i have', "you've": 'you have', "we've": 'we have', "they've": 'they have',
+    // Ortografía británica = misma palabra
+    colour: 'color', colours: 'colors', favour: 'favor', favourite: 'favorite', favourites: 'favorites',
+    neighbour: 'neighbor', neighbours: 'neighbors', honour: 'honor', humour: 'humor', flavour: 'flavor',
+    behaviour: 'behavior', centre: 'center', theatre: 'theater', metre: 'meter', litre: 'liter',
+    realise: 'realize', realised: 'realized', organise: 'organize', organised: 'organized',
+    apologise: 'apologize', recognise: 'recognize', practise: 'practice', practising: 'practicing',
+    travelling: 'traveling', cancelled: 'canceled', grey: 'gray', programme: 'program', licence: 'license',
+    tyre: 'tire', cheque: 'check', maths: 'math', alright: 'all right',
     ok: 'okay', 'o.k.': 'okay', tv: 'tv', mom: 'mom', mum: 'mom',
   };
   const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',

@@ -1,0 +1,53 @@
+'use strict';
+/*
+  FRASES DE INGLÉS BRITÁNICO (se escuchan siempre con voz británica)
+  IMPORTANTE: agrega siempre al FINAL de la lista. Los ids dependen de la posición
+  y tu progreso guardado se mezclaría si insertas en medio.
+*/
+
+const BRITISH = [
+  { en: 'Cheers, mate.', es: 'Gracias, amigo.', sound: 'chías, méit', chunks: [['Cheers', 'gracias / salud'], ['mate', 'amigo']] },
+  { en: 'You all right?', es: '¿Qué tal?', sound: 'iú ól ráit', chunks: [['You all right?', '¿qué tal? (saludo)']], tip: "Es un saludo: no te preguntan si te pasa algo. Puedes responder 'Yeah, you?'" },
+  { en: 'Not too bad, thanks.', es: 'Bastante bien, gracias.', sound: 'nót tú bád, zánks', chunks: [['Not too bad', 'nada mal / bastante bien'], ['thanks', 'gracias']] },
+  { en: 'Fancy a cuppa?', es: '¿Te provoca un tecito?', sound: 'fánsi a kápa', chunks: [['Fancy', '¿te provoca...?'], ['a cuppa', 'una taza de té']] },
+  { en: "I'm knackered.", es: 'Estoy agotado.', sound: 'áim nákad', chunks: [["I'm", 'estoy'], ['knackered', 'agotado']] },
+  { en: "That's brilliant!", es: '¡Eso es genial!', sound: 'dats bríliant', chunks: [["That's", 'eso es'], ['brilliant', 'genial']] },
+  { en: 'Lovely, thanks.', es: 'Perfecto, gracias.', sound: 'lávli, zánks', chunks: [['Lovely', 'perfecto / qué bien'], ['thanks', 'gracias']], tip: "'Lovely' se usa para casi todo lo que te parece bien." },
+  { en: 'No worries.', es: 'No hay problema.', sound: 'nóu uáris', chunks: [['No worries', 'no hay problema']] },
+  { en: "That's sorted, then.", es: 'Entonces ya está resuelto.', sound: 'dats sótid, den', chunks: [["That's", 'eso está'], ['sorted', 'resuelto'], ['then', 'entonces']] },
+  { en: "I'm gutted.", es: 'Estoy muy decepcionado.', sound: 'áim gátid', chunks: [["I'm", 'estoy'], ['gutted', 'muy decepcionado']] },
+  { en: "It's rubbish.", es: 'Es una porquería.', sound: 'its rábish', chunks: [["It's", 'es'], ['rubbish', 'basura / porquería']] },
+  { en: 'Bloody hell!', es: '¡Carajo!', sound: 'bládi jél', chunks: [['Bloody hell', '¡carajo!']], tip: 'Es una grosería suave. La oirás en series y películas, pero no la uses en una entrevista.' },
+  { en: "I'm off to bed.", es: 'Me voy a dormir.', sound: 'áim of tu béd', chunks: [["I'm off", 'me voy'], ['to bed', 'a la cama']] },
+  { en: 'Shall we go?', es: '¿Nos vamos?', sound: 'shál uí góu', chunks: [['Shall we', '¿...nosotros? (proponer)'], ['go', 'ir']] },
+  { en: 'Have you got a pen?', es: '¿Tienes un lapicero?', sound: 'jáv iú got a pén', chunks: [['Have you got', '¿tienes?'], ['a pen', 'un lapicero']], tip: "En EE. UU. dirían 'Do you have a pen?'" },
+  { en: "I haven't got a clue.", es: 'No tengo ni idea.', sound: 'ái jávent got a klú', chunks: [["I haven't got", 'no tengo'], ['a clue', 'ni idea']] },
+  { en: "Why don't you pop round later?", es: '¿Por qué no te das una vuelta por mi casa más tarde?', sound: 'uái dóunt iú pop ráund léita', chunks: [["Why don't you", '¿por qué no...?'], ['pop round', 'pasar un ratito'], ['later', 'más tarde']] },
+  { en: "I'll give you a ring.", es: 'Te llamo.', sound: 'áil guív iú a ring', chunks: [["I'll give you", 'te daré'], ['a ring', 'una llamada']], tip: "En EE. UU. dirían 'I'll call you'." },
+  { en: 'Can I have the bill, please?', es: '¿Me trae la cuenta, por favor?', sound: 'kan ái jav de bíl, plíis', chunks: [['Can I have', '¿me da?'], ['the bill', 'la cuenta'], ['please', 'por favor']], tip: "En EE. UU. dirían 'the check'." },
+  { en: "Where's the loo?", es: '¿Dónde está el baño?', sound: 'uéas de lú', chunks: [["Where's", '¿dónde está?'], ['the loo', 'el baño']], tip: "En EE. UU. dirían 'the bathroom'." },
+  { en: 'We live in a flat.', es: 'Vivimos en un departamento.', sound: 'uí lív in a flát', chunks: [['We live', 'vivimos'], ['in a flat', 'en un departamento']], tip: "En EE. UU. dirían 'apartment'." },
+  { en: "Let's take the lift.", es: 'Vamos en el ascensor.', sound: 'lets téik de líft', chunks: [["Let's take", 'tomemos'], ['the lift', 'el ascensor']], tip: "En EE. UU. dirían 'elevator'." },
+  { en: 'I need to get some petrol.', es: 'Necesito echar gasolina.', sound: 'ái níid tu guét sam pétrol', chunks: [['I need to', 'necesito'], ['get some', 'conseguir algo de'], ['petrol', 'gasolina']], tip: "En EE. UU. dirían 'gas'." },
+  { en: "I'm going on holiday.", es: 'Me voy de vacaciones.', sound: 'áim góing on jólidei', chunks: [["I'm going", 'me voy'], ['on holiday', 'de vacaciones']], tip: "En EE. UU. dirían 'on vacation'." },
+  { en: 'Do you want some crisps?', es: '¿Quieres papitas fritas?', sound: 'du iú uónt sam krísps', chunks: [['Do you want', '¿quieres?'], ['some', 'algo de'], ['crisps', 'papitas de bolsa']], tip: "'Crisps' son las de bolsa; 'chips' son las papas fritas calientes." },
+  { en: "Let's go to the cinema.", es: 'Vamos al cine.', sound: 'lets góu tu de sínema', chunks: [["Let's go", 'vamos'], ['to the cinema', 'al cine']] },
+  { en: 'Mind the gap.', es: 'Cuidado con el espacio.', sound: 'máind de gáp', chunks: [['Mind', 'cuidado con'], ['the gap', 'el espacio']], tip: 'Es el aviso famoso del metro de Londres, entre el tren y el andén.' },
+  { en: 'Take the first left at the roundabout.', es: 'Toma la primera a la izquierda en la rotonda.', sound: 'téik de férst left at de ráundabaut', chunks: [['Take', 'toma'], ['the first left', 'la primera a la izquierda'], ['at the roundabout', 'en la rotonda']] },
+  { en: 'The lorry is blocking the road.', es: 'El camión está bloqueando la pista.', sound: 'de lóri is blóking de róud', chunks: [['The lorry', 'el camión'], ['is blocking', 'está bloqueando'], ['the road', 'la pista']], tip: "En EE. UU. dirían 'truck'." },
+  { en: "I'll meet you in the car park.", es: 'Te veo en el estacionamiento.', sound: 'áil míit iú in de ká pák', chunks: [["I'll meet you", 'te veo'], ['in the car park', 'en el estacionamiento']], tip: "En EE. UU. dirían 'parking lot'." },
+  { en: "It's half past six.", es: 'Son las seis y media.', sound: 'its jáaf past síks', chunks: [["It's", 'son'], ['half past six', 'las seis y media']] },
+  { en: "It's quarter to nine.", es: 'Son las nueve menos cuarto.', sound: 'its kuóta tu náin', chunks: [["It's", 'son'], ['quarter to nine', 'las nueve menos cuarto']] },
+  { en: "I'm a bit peckish.", es: 'Tengo un poquito de hambre.', sound: 'áim a bit pékish', chunks: [["I'm", 'estoy'], ['a bit', 'un poco'], ['peckish', 'con hambre']] },
+  { en: "Don't be daft.", es: 'No seas tonto.', sound: 'dóunt bi dáaft', chunks: [["Don't be", 'no seas'], ['daft', 'tonto']] },
+  { en: "He's a bit posh.", es: 'Es un poco pituco.', sound: 'jis a bit pósh', chunks: [["He's", 'él es'], ['a bit', 'un poco'], ['posh', 'pituco, elegante']] },
+  { en: "That's a bit dodgy.", es: 'Eso está medio sospechoso.', sound: 'dats a bit dóyi', chunks: [["That's", 'eso es'], ['a bit', 'un poco'], ['dodgy', 'sospechoso']] },
+  { en: "It's chucking it down.", es: 'Está lloviendo a cántaros.', sound: 'its cháking it dáun', chunks: [["It's chucking it down", 'llueve a cántaros']] },
+  { en: "I'm chuffed to bits.", es: 'Estoy feliz de la vida.', sound: 'áim cháft tu bíts', chunks: [["I'm chuffed", 'estoy contentísimo'], ['to bits', 'totalmente']] },
+  { en: "And Bob's your uncle.", es: 'Y listo, así de fácil.', sound: 'and bóbs ior ánkel', chunks: [["And Bob's your uncle", 'y listo']], tip: 'Se dice al terminar de explicar algo sencillo. Literalmente: "y Bob es tu tío".' },
+  { en: 'Keep calm and carry on.', es: 'Mantén la calma y sigue adelante.', sound: 'kíip káam and kári on', chunks: [['Keep calm', 'mantén la calma'], ['and carry on', 'y sigue adelante']] },
+  { en: 'Can I have some water, please?', es: '¿Me da un poco de agua, por favor?', sound: 'kan ái jav sam uóta, plíis', chunks: [['Can I have', '¿me da?'], ['some water', 'un poco de agua'], ['please', 'por favor']], tip: "La T se pronuncia clara y la R final casi no suena: 'uóta'. En EE. UU. suena 'uáder'." },
+  { en: "I can't dance.", es: 'No sé bailar.', sound: 'ái káant dáans', chunks: [["I can't", 'no puedo / no sé'], ['dance', 'bailar']], tip: "'Can't' suena con A larga: 'káant'. En EE. UU. suena más corto, casi 'kent'." },
+  { en: "What's your schedule like?", es: '¿Cómo está tu horario?', sound: 'uóts iór shédiul láik', chunks: [["What's", 'cómo está'], ['your schedule', 'tu horario'], ['like', '(como)']], tip: "En británico 'schedule' empieza con 'sh'. En EE. UU. empieza con 'sk'." },
+  { en: 'I love tomatoes.', es: 'Me encantan los tomates.', sound: 'ái láv tomáatous', chunks: [['I love', 'me encantan'], ['tomatoes', 'los tomates']], tip: "En británico: 'tomáato'. En EE. UU.: 'toméito'." },
+];

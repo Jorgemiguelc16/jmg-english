@@ -1,0 +1,43 @@
+/* ============ Layout ============ */
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  position: sticky; top: 0; height: 100vh; width: var(--sidebar); flex-shrink: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 18px 14px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 4px 8px 18px; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+  background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 1.05rem;
+}
+.brand-name { display: flex; flex-direction: column; font-weight: 700; font-size: .98rem; line-height: 1.2; }
+.brand-name small { font-weight: 500; font-size: .74rem; color: var(--muted); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 11px; padding: 9px 10px; border-radius: var(--radius-sm);
+  color: var(--text-2); text-decoration: none; font-weight: 500; font-size: .93rem;
+}
+.nav-item .i { color: var(--muted); }
+.nav-item:hover { background: var(--surface-2); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.nav-item.active .i { color: var(--accent); }
+.side-foot { margin-top: auto; display: grid; gap: 10px; }
+.mini-stat { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.mini-stat .i { color: var(--muted); }
+.mini-stat.lit .i { color: var(--flame); }
+.mini-stat b { font-size: .92rem; }
+.mini-stat span { font-size: .78rem; color: var(--muted); display: block; }
+
+.main { flex: 1; min-width: 0; padding: 32px 40px 72px; max-width: 1180px; }
+
+/* ============ Encabezados de página ============ */
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.page-head p.sub { color: var(--muted); margin-top: 6px; max-width: 640px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 30px 0 12px; }
+.section-head p { color: var(--muted); font-size: .88rem; margin-top: 2px; }
+
+/* Aviso sin internet */
+.offline-note { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; margin-bottom: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text-2); font-size: .88rem; line-height: 1.5; }
+.offline-note .i { flex-shrink: 0; margin-top: 2px; color: var(--muted); }
+.offline-note b { color: var(--text); }

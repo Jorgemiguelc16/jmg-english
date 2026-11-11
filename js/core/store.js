@@ -42,7 +42,7 @@ const Store = (() => {
       custom: [],   // frases propias: { id, en, es, src, chunks }
       memoCol: 'movies',
       totalReps: 0,
-      settings: { voice: '', rate: 0.95, autoplay: true, sounds: true },
+      settings: { voice: '', rate: 0.95, autoplay: true, sounds: true, accent: 'us' },
     };
   }
 
@@ -220,7 +220,6 @@ const Store = (() => {
       .sort((a, b) => (b[1].lapses - a[1].lapses) || (a[1].iv - b[1].iv))
       .map(([id]) => id);
   }
-  function masteredCount() { return learnedIds().filter((id) => status(id) === 'mastered').length; }
 
   /* ---------- Nivel ---------- */
   function levelInfo(xp = state.xp) {
@@ -243,7 +242,6 @@ const Store = (() => {
     }
     return TOPICS[idx];
   }
-  function setTopic(id) { state.topic = id; save(); }
 
   function dialogDone(id, score) {
     const prev = state.dialogs[id];
@@ -263,11 +261,10 @@ const Store = (() => {
 
   return {
     get state() { return state; },
-    save, today, addDays, diffDays, dateKey, addReps, addCustom, removeCustom,
+    save, today, addDays, addReps, addCustom, removeCustom,
     todayRec, dayCounted, streakView, recordExercise, finishSession,
-    learn, rate, practice, status, dueIds, learnedIds, markKnown, dueSceneIds, learnedSceneIds, weakIds, masteredCount,
-    levelInfo, currentTopic, setTopic, dialogDone,
+    learn, rate, practice, status, dueIds, learnedIds, markKnown, dueSceneIds, learnedSceneIds, weakIds,
+    levelInfo, currentTopic, dialogDone,
     exportData, importData, reset,
-    MIN_EX_FOR_DAY,
   };
 })();

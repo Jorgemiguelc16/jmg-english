@@ -12,9 +12,10 @@ function sceneLines(d) {
   const n = Store.state.name || 'Alex';
   return d.lines.map(([sp, en, es, note]) => ({ sp, en: en.replace(/\{name\}/g, n), es: es.replace(/\{name\}/g, n), note: note || '' }));
 }
-function sceneVoices() {
-  const you = Speech.mainVoice();
-  const other = Speech.altVoice();
+function sceneVoices(d) {
+  const ac = d && d.group === 'british' ? 'uk' : undefined;
+  const you = Speech.mainVoice(ac);
+  const other = Speech.altVoice(ac);
   return { B: { voice: you }, A: other ? { voice: other } : { voice: you, pitch: 0.75 } };
 }
 function sceneGroupBadge(d) {
@@ -49,7 +50,7 @@ Ex.scene = {
     const d = item.scene;
     const review = !!item.review;
     const lines = sceneLines(d);
-    const V = sceneVoices();
+    const V = sceneVoices(d);
     const isNew = !Store.state.cards[d.id];
     const STEPS = ['Escuchar', 'Repetir', 'Tu parte', 'Cambia de papel'];
     let step = review ? 2 : 0;

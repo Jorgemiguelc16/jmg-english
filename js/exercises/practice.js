@@ -22,7 +22,13 @@ function autoSay(text) { if (Store.state.settings.autoplay) setTimeout(() => Spe
 function topicName(p) { return TOPIC_BY_ID[p.topic] ? TOPIC_BY_ID[p.topic].name : (p.src || (COLLECTION_BY_ID[p.col] || {}).name || ''); }
 function siblings(p) { return TOPIC_BY_ID[p.topic] ? TOPIC_BY_ID[p.topic].items : ((COLLECTION_BY_ID[p.col] || {}).items || []); }
 function scoreClass(s) { return s >= 0.85 ? 'good' : s >= 0.6 ? 'mid' : 'low'; }
-function tipBox(p) { return p.tip ? `<div class="callout">${icon('bulb')}<span>${esc(p.tip)}</span></div>` : ''; }
+// En modo británico se quitan las oraciones que describen la T "suave" americana
+const US_ONLY_TIP = /wha-da-ya|didja|gedda|geda|i-dout|whadai/;
+function tipText(p) {
+  if (!p.tip || Speech.accent() !== 'uk' || p.col === 'british') return p.tip || '';
+  return p.tip.split(/(?<=[.!?])\s+/).filter((x) => !US_ONLY_TIP.test(x)).join(' ');
+}
+function tipBox(p) { const t = tipText(p); return t ? `<div class="callout">${icon('bulb')}<span>${esc(t)}</span></div>` : ''; }
 function optionsHtml(opts) {
   return `<div class="options">${opts.map((o, i) => `<button class="option" data-key="${i + 1}" data-i="${i}" type="button"><span class="k">${i + 1}</span><span>${esc(o)}</span></button>`).join('')}</div>`;
 }
